@@ -24,6 +24,7 @@ class FindingDecisionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    finding_id: str
     user_id: str
     decision: DecisionAction
     custom_edit: Optional[str] = None

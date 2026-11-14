@@ -23,3 +23,11 @@
 - **Context:** `aiosqlite` and `TestClient` asynchronous worker threads on Windows experience deadlock and event loop signaling blocks when interacting across process boundaries.
 - **Decision:** Use standard synchronous SQLAlchemy `Session` with FastAPI's native threadpool execution (`def endpoint(db: Session = Depends(get_db)):`).
 - **Consequences:** Instantaneous sub-10ms database operations, zero thread deadlocks on Windows, and seamless compatibility with both SQLite and PostgreSQL.
+
+## ADR-005: High-Severity Sign-Off Guardrail & Version-Locked Export
+- **Context:** The core principle of BrandSentinel is "AI suggests. Humans decide. No finding without evidence. No automatic publishing." Organizations require an auditable guarantee that content cannot be published if critical inaccuracies or legal hazards remain unaddressed.
+- **Decision:**
+  1. Any finding classified as `HIGH` severity or below 85% confidence automatically sets `requires_human_review = True`.
+  2. The sign-off approval endpoint (`/submissions/{id}/sign-off`) strictly checks that all `HIGH` severity findings on the latest content version possess an explicit, recorded human decision (`ACCEPTED`, `EDITED`, or `REJECTED` with a mandatory reason). If any unresolved high-severity finding remains, sign-off is blocked with a 400 Bad Request error.
+  3. Once approved, content is version-locked (modifications to findings or content version are blocked). BrandSentinel never publishes directly; instead, it generates an immutable Digital Compliance Certificate (`CERT-...`) with full audit provenance and compliance score for export.
+- **Consequences:** Guarantees absolute regulatory compliance, eliminates rogue unverified publications, and maintains an unalterable audit trail.

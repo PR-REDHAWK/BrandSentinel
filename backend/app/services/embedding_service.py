@@ -48,7 +48,9 @@ def get_embedding(text: str) -> List[float]:
                 model=settings.EMBEDDING_MODEL,
                 contents=cleaned,
             )
-            if response.embedding and hasattr(response.embedding, "values"):
+            if hasattr(response, "embeddings") and response.embeddings:
+                return list(response.embeddings[0].values)
+            if hasattr(response, "embedding") and response.embedding and hasattr(response.embedding, "values"):
                 return list(response.embedding.values)
         except Exception as e:
             logger.warning(f"Gemini embedding API call failed: {e}. Falling back to local embedding.")

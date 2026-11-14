@@ -19,8 +19,8 @@ class Settings(BaseSettings):
 
     # AI Configuration
     GEMINI_API_KEY: str = ""
-    EMBEDDING_MODEL: str = "text-embedding-004"
-    LLM_MODEL: str = "gemini-2.0-flash"
+    EMBEDDING_MODEL: str = "gemini-embedding-001"
+    LLM_MODEL: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(
         env_file=str(Path(__file__).resolve().parent.parent / ".env"),
