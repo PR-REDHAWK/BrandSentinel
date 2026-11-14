@@ -49,18 +49,20 @@ def run_deterministic_rag_grounding(
     # 1. Fact-vs-Claim Verification
     for fact in approved_facts:
         truth = fact.approved_truth.lower()
-        # Look for numbers/percentages in approved truth vs draft
-        truth_pcts = re.findall(r"(\d+)%", truth)
-        draft_pcts = re.findall(r"(\d+)%", content)
+        # Look for numbers/percentages in approved truth vs draft (supports decimals e.g. 99.99%)
+        truth_pcts = re.findall(r"(\d+(?:\.\d+)?)%", truth)
+        draft_pcts = re.findall(r"(\d+(?:\.\d+)?)%", content)
 
         # Check if draft mentions the topic or claim pattern
         pattern_words = [w for w in fact.claim_pattern.lower().split() if len(w) > 3]
         pattern_match = any(pw in content_lower for pw in pattern_words) if pattern_words else True
 
         if pattern_match and truth_pcts and draft_pcts:
-            t_val = int(truth_pcts[0])
+            t_val = float(truth_pcts[0])
+            t_fmt = f"{int(t_val)}%" if t_val.is_integer() else f"{t_val}%"
             for d_str in draft_pcts:
-                d_val = int(d_str)
+                d_val = float(d_str)
+                d_fmt = f"{int(d_val)}%" if d_val.is_integer() else f"{d_val}%"
                 if d_val > t_val:
                     # Exaggerated metric detected!
                     findings.append(
@@ -69,24 +71,24 @@ def run_deterministic_rag_grounding(
                             engine=AuditEngine.RAG_LLM,
                             category="FACTUAL",
                             severity=FindingSeverity.HIGH,
-                            title=f"Exaggerated Performance Claim ({d_val}% vs approved {t_val}%)",
-                            detected_content=f"{d_val}% (in draft: '{content}')",
+                            title=f"Exaggerated Performance Claim ({d_fmt} vs approved {t_fmt})",
+                            detected_content=f"{d_fmt} (in draft: '{content}')",
                             explanation=(
-                                f"Draft claims {d_val}%, which exceeds the organization's approved truth "
-                                f"of up to {t_val}%. {fact.mandatory_caveat or ''}"
+                                f"Draft claims {d_fmt}, which exceeds the organization's approved truth "
+                                f"of up to {t_fmt}. {fact.mandatory_caveat or ''}"
                             ),
                             source_citation=fact.source_citation,
                             supporting_passage=fact.approved_truth,
-                            suggested_correction=f"Customers achieve up to {t_val}% improvement.",
+                            suggested_correction=f"Customers achieve up to {t_fmt} improvement.",
                             confidence_score=0.95,
                             requires_human_review=True,
                         )
                     )
 
-        # Timeframe comparison (e.g. "overnight" or "instant" vs months/weeks)
-        if ("overnight" in content_lower or "instantly" in content_lower) and (
-            "month" in truth or "week" in truth or "year" in truth
-        ):
+        # Timeframe comparison (e.g. "overnight", "instant", "24 hours", "day one" vs months/weeks)
+        timeframe_keywords = ["overnight", "instantly", "instant", "24 hours", "24-hour", "day one", "three days", "3 days"]
+        matched_time = next((k for k in timeframe_keywords if k in content_lower), None)
+        if matched_time and ("month" in truth or "week" in truth or "year" in truth):
             findings.append(
                 FindingBase(
                     rule_id="RAG-02-TIMEFRAME-MISMATCH",
@@ -94,9 +96,9 @@ def run_deterministic_rag_grounding(
                     category="FACTUAL",
                     severity=FindingSeverity.HIGH,
                     title="Unsubstantiated Timeframe Promise",
-                    detected_content="overnight" if "overnight" in content_lower else "instantly",
+                    detected_content=matched_time,
                     explanation=(
-                        f"Draft promises instantaneous/overnight results, but the approved factual benchmark "
+                        f"Draft promises '{matched_time}' results, but the approved factual benchmark "
                         f"states: '{fact.approved_truth}'"
                     ),
                     source_citation=fact.source_citation,
@@ -113,6 +115,9 @@ def run_deterministic_rag_grounding(
         ("guaranteed success", "guaranteed", "Avoid unsupportable commercial guarantees"),
         ("miracle", "miracle", "Unprofessional hyperbole"),
         ("unmatched in every way", "unmatched", "Requires competitive substantiation"),
+        ("greatest software", "greatest", "Unsubstantiated superlative comparison"),
+        ("revolutionary", "revolutionary", "Avoid unverified marketing hyperbole"),
+        ("unprecedented", "unprecedented", "Requires historical industry substantiation"),
     ]
     for phrase, keyword, reason in hyperbole_phrases:
         if keyword in content_lower:

@@ -40,3 +40,33 @@ def parse_approved_facts_csv(content: str) -> List[Dict[str, Any]]:
             facts.append(fact)
 
     return facts
+
+
+def parse_glossary_csv(content: str) -> List[Dict[str, Any]]:
+    """
+    Parse a glossary & banned-terms CSV file into structured dictionaries.
+    """
+    reader = csv.DictReader(io.StringIO(content))
+    terms: List[Dict[str, Any]] = []
+
+    for row in reader:
+        normalized_row = {k.strip().lower(): v.strip() for k, v in row.items() if k and v}
+        term = normalized_row.get("term")
+        if not term:
+            continue
+
+        is_banned_val = normalized_row.get("is_banned", "false").lower()
+        is_banned = is_banned_val in ["true", "1", "yes", "y"]
+
+        case_sens_val = normalized_row.get("case_sensitive", "false").lower()
+        case_sensitive = case_sens_val in ["true", "1", "yes", "y"]
+
+        terms.append({
+            "term": term,
+            "is_banned": is_banned,
+            "preferred_term": normalized_row.get("preferred_term"),
+            "definition_or_rule": normalized_row.get("definition_or_rule", "Glossary term definition"),
+            "case_sensitive": case_sensitive,
+        })
+
+    return terms

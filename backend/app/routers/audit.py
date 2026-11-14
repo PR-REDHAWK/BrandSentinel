@@ -205,8 +205,20 @@ def upload_file_and_run_audit(
     Submit an actual PDF, DOCX, or Image file.
     Genuinely extracts text and images, creates submission, and executes the Tri-Engine pipeline.
     """
-    filename = file.filename.lower()
+    filename = (file.filename or "").lower()
+    allowed_exts = (".pdf", ".docx", ".doc", ".txt", ".md", ".png", ".jpg", ".jpeg", ".webp")
+    if not filename.endswith(allowed_exts):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file format. Allowed: {allowed_exts}",
+        )
+
     file_bytes = file.file.read()
+    if len(file_bytes) > 25 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File size exceeds maximum allowed threshold of 25MB",
+        )
 
     extracted_text = ""
     extracted_images: List[bytes] = []

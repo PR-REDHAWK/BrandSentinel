@@ -6,6 +6,10 @@ import numpy as np
 from app.config import settings
 from app.utils.logger import logger
 
+# In-memory LRU embedding cache (text hash -> vector)
+_EMBEDDING_CACHE: dict = {}
+_MAX_CACHE_SIZE = 1024
+
 
 def generate_deterministic_embedding(text: str, dim: int = 768) -> List[float]:
     """
@@ -32,13 +36,19 @@ def generate_deterministic_embedding(text: str, dim: int = 768) -> List[float]:
 
 def get_embedding(text: str) -> List[float]:
     """
-    Generate a 768-dimensional semantic embedding for the provided text.
-    Uses Google text-embedding-004 when API key is set, falling back gracefully
-    to deterministic projection.
+    Generate a semantic embedding for the provided text.
+    Uses in-memory LRU cache and Google text-embedding-004 when API key is set,
+    falling back gracefully to deterministic projection.
     """
     cleaned = text.strip()
     if not cleaned:
         return [0.0] * 768
+
+    cache_key = hashlib.sha256(cleaned.encode("utf-8")).hexdigest()
+    if cache_key in _EMBEDDING_CACHE:
+        return _EMBEDDING_CACHE[cache_key]
+
+    embedding_vec: List[float] = []
 
     if settings.GEMINI_API_KEY:
         try:
@@ -49,13 +59,21 @@ def get_embedding(text: str) -> List[float]:
                 contents=cleaned,
             )
             if hasattr(response, "embeddings") and response.embeddings:
-                return list(response.embeddings[0].values)
-            if hasattr(response, "embedding") and response.embedding and hasattr(response.embedding, "values"):
-                return list(response.embedding.values)
+                embedding_vec = list(response.embeddings[0].values)
+            elif hasattr(response, "embedding") and response.embedding and hasattr(response.embedding, "values"):
+                embedding_vec = list(response.embedding.values)
         except Exception as e:
             logger.warning(f"Gemini embedding API call failed: {e}. Falling back to local embedding.")
 
-    return generate_deterministic_embedding(cleaned, dim=768)
+    if not embedding_vec:
+        embedding_vec = generate_deterministic_embedding(cleaned, dim=768)
+
+    # Cache eviction if full
+    if len(_EMBEDDING_CACHE) >= _MAX_CACHE_SIZE:
+        _EMBEDDING_CACHE.pop(next(iter(_EMBEDDING_CACHE)))
+    _EMBEDDING_CACHE[cache_key] = embedding_vec
+
+    return embedding_vec
 
 
 def get_embeddings_batch(texts: List[str]) -> List[List[float]]:
