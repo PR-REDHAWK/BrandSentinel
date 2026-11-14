@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { PlusCircle, FileCheck2, Clock, Send, FileText } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
@@ -134,7 +135,11 @@ export default function SubmissionsPage() {
           ) : (
             <div className="space-y-3">
               {submissions.map((s) => (
-                <div key={s.id} className="p-4 border border-slate-200 rounded-lg bg-slate-50 flex items-center justify-between">
+                <Link
+                  key={s.id}
+                  href={`/submissions/${s.id}`}
+                  className="p-4 border border-slate-200 rounded-lg bg-slate-50 flex items-center justify-between hover:border-blue-400 hover:bg-blue-50/30 transition block"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <span className="font-semibold text-sm text-slate-900">{s.title}</span>
@@ -151,8 +156,9 @@ export default function SubmissionsPage() {
                     <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-blue-100 text-blue-800">
                       {s.current_status}
                     </span>
+                    <span className="text-xs text-blue-700 font-semibold">Inspect Audit →</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
