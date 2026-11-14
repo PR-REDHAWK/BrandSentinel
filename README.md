@@ -238,7 +238,3 @@ Total Review Execution Time:    4.51s (Target: < 30s)
 * [Architectural Decisions Record (ADR-001 through ADR-005)](DECISIONS.md)
 
 ---
-
-## 7. License & Credits
-Built for the Hackathon by the BrandSentinel Solo Development Team.
-Developed with Google DeepMind Antigravity, FastAPI, Next.js, and Google Gemini.
