@@ -31,6 +31,8 @@ services:
       - JWT_SECRET=${JWT_SECRET:-brandsentinel_super_secret_jwt_key_change_in_production}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - ENVIRONMENT=production
+      - AUTO_SEED=true
+      - CORS_ORIGINS=*
     ports:
       - "8000:8000"
     volumes:
