@@ -21,7 +21,7 @@ export default function RootLayout({
           <Navbar />
           <div className="flex">
             <Sidebar />
-            <main className="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto">
+            <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
               {children}
             </main>
           </div>

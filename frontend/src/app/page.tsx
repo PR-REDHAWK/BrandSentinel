@@ -62,7 +62,7 @@ export default function DashboardPage() {
   // ==================== PUBLIC LANDING PAGE (UNAUTHENTICATED) ====================
   if (!user) {
     return (
-      <div className="space-y-16 py-6">
+      <div className="space-y-10 py-2">
         {/* Hero Section */}
         <div className="max-w-4xl mx-auto text-center space-y-6 pt-4">
           <div className="inline-flex items-center space-x-2 bg-blue-50/80 border border-blue-200 text-blue-700 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider shadow-xs hover:scale-105 transition-transform duration-300">
