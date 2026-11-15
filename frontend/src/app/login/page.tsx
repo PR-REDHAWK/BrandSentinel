@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, Lock, Mail, AlertCircle } from "lucide-react";
+import { Shield, Lock, Mail, AlertCircle, Sparkles, CheckCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
@@ -13,6 +13,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handleQuickLogin = async (demoEmail: string, demoPass: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setError("");
+    setLoading(true);
+
+    try {
+      await login({ email: demoEmail, password: demoPass });
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "Failed to sign in. Please verify your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +62,60 @@ export default function LoginPage() {
             <span>{error}</span>
           </div>
         )}
+
+        {/* 1-Click Evaluation Logins for Judges */}
+        <div className="mb-6 p-4 bg-gradient-to-br from-blue-50 to-indigo-50/60 border border-blue-200/80 rounded-xl">
+          <div className="flex items-center space-x-1.5 mb-1.5">
+            <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
+            <span className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+              Judge Evaluation 1-Click Logins
+            </span>
+          </div>
+          <p className="text-xs text-blue-800/80 mb-3">
+            Pre-seeded with Acme Corp brand guidelines & findings. Click any role to enter instantly:
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => handleQuickLogin("admin@acme.com", "Password123!")}
+              disabled={loading}
+              className="px-2 py-2.5 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 rounded-lg text-xs font-semibold text-slate-800 transition shadow-xs flex flex-col items-center text-center group"
+            >
+              <span className="text-sm">👑</span>
+              <span className="mt-0.5 group-hover:text-white">Admin</span>
+              <span className="text-[10px] text-slate-500 group-hover:text-blue-100 font-normal">Full Hub</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickLogin("reviewer@acme.com", "Password123!")}
+              disabled={loading}
+              className="px-2 py-2.5 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 rounded-lg text-xs font-semibold text-slate-800 transition shadow-xs flex flex-col items-center text-center group"
+            >
+              <span className="text-sm">🔍</span>
+              <span className="mt-0.5 group-hover:text-white">Reviewer</span>
+              <span className="text-[10px] text-slate-500 group-hover:text-blue-100 font-normal">Sign-Off</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickLogin("creator@acme.com", "Password123!")}
+              disabled={loading}
+              className="px-2 py-2.5 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 rounded-lg text-xs font-semibold text-slate-800 transition shadow-xs flex flex-col items-center text-center group"
+            >
+              <span className="text-sm">✍️</span>
+              <span className="mt-0.5 group-hover:text-white">Creator</span>
+              <span className="text-[10px] text-slate-500 group-hover:text-blue-100 font-normal">Drafts</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="relative mb-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200"></div>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-slate-400 font-medium">Or enter manually</span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

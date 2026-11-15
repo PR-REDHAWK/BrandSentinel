@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { PlusCircle, FileCheck2, Clock, Send, FileText } from "lucide-react";
+import { PlusCircle, FileCheck2, Clock, Send, FileText, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { Submission } from "@/lib/types";
@@ -70,6 +70,48 @@ export default function SubmissionsPage() {
             <PlusCircle className="w-4 h-4 text-blue-600" />
             <span>Create Draft Submission</span>
           </h2>
+
+          {/* Quick-Load Test Cases for Judges */}
+          <div className="mb-4 p-3 bg-gradient-to-br from-blue-50 to-indigo-50/60 border border-blue-200/80 rounded-xl space-y-2">
+            <div className="flex items-center space-x-1.5 text-xs font-bold text-blue-900 uppercase">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <span>Judge Quick-Test Samples</span>
+            </div>
+            <p className="text-[11px] text-blue-800/80">
+              Click a sample to populate test violations and run the Tri-Engine audit:
+            </p>
+            <div className="flex flex-col space-y-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setTitle("Acme Cloud 2026 Announcement");
+                  setTargetChannel("Press");
+                  setRawContent(
+                    "We guarantee an unbelievable 100% cost reduction within 24 hours. Our dirt cheap tier delivers 99.999% uptime for every enterprise customer without exception."
+                  );
+                }}
+                className="text-left px-2.5 py-1.5 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 rounded-lg text-xs font-medium text-slate-700 transition flex items-center justify-between group"
+              >
+                <span>🧪 Sample 1: FTC Claim & Banned Slang</span>
+                <span className="text-[10px] text-slate-400 group-hover:text-blue-100 font-mono">Load →</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTitle("Acme Enterprise Promotion");
+                  setTargetChannel("Social");
+                  setRawContent(
+                    "Switch to Acme now to cut infrastructure expenses to nothing overnight! Our miraculous technology saves up to 80% immediately with zero setup required."
+                  );
+                }}
+                className="text-left px-2.5 py-1.5 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 rounded-lg text-xs font-medium text-slate-700 transition flex items-center justify-between group"
+              >
+                <span>🧪 Sample 2: Tone & Outdated Metric</span>
+                <span className="text-[10px] text-slate-400 group-hover:text-blue-100 font-mono">Load →</span>
+              </button>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">

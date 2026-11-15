@@ -274,6 +274,53 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Judge Quick-Start Evaluation Walkthrough Banner */}
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-blue-800">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="font-bold text-sm tracking-wide uppercase text-blue-200">
+              Hackathon Evaluation Guide (Under 2 Minutes)
+            </span>
+          </div>
+          <span className="text-xs bg-blue-800/80 text-blue-200 px-3 py-1 rounded-full font-mono">
+            Acme Corp Pre-Seeded
+          </span>
+        </div>
+        <p className="text-xs text-slate-300 mb-4 leading-relaxed">
+          Follow these 3 quick steps to evaluate the full Tri-Engine pipeline and human editorial sovereignty:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div className="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/15 transition flex flex-col justify-between">
+            <div>
+              <span className="font-bold text-emerald-400 block mb-1">1. Test Live Tri-Engine Audit</span>
+              <p className="text-slate-300 text-[11px] mb-2">Open Submissions → click &apos;Quick-Test Samples&apos; → inspect live findings.</p>
+            </div>
+            <Link href="/submissions" className="text-blue-300 font-semibold hover:underline inline-flex items-center space-x-1 mt-1">
+              <span>Go to Submissions</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/15 transition flex flex-col justify-between">
+            <div>
+              <span className="font-bold text-blue-300 block mb-1">2. Decision State Machine</span>
+              <p className="text-slate-300 text-[11px] mb-2">See findings with exact citations to Q4 Audit p. 14. Click Accept, Edit, or Reject.</p>
+            </div>
+            <span className="text-slate-400 text-[11px] mt-1 font-mono">Creator Sovereignty</span>
+          </div>
+          <div className="bg-white/10 rounded-xl p-3 border border-white/10 hover:bg-white/15 transition flex flex-col justify-between">
+            <div>
+              <span className="font-bold text-purple-300 block mb-1">3. Certify & Analytics</span>
+              <p className="text-slate-300 text-[11px] mb-2">Sign-off to issue tamper-proof certificate (CERT-...). Check Analytics for defect trends.</p>
+            </div>
+            <Link href="/insights" className="text-blue-300 font-semibold hover:underline inline-flex items-center space-x-1 mt-1">
+              <span>View Analytics</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Metrics Row with Interactive Hover Effects */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
         <Link
