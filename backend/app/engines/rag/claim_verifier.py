@@ -259,6 +259,9 @@ def audit_content_with_rag(
     # 1. Retrieve organization approved facts
     stmt_facts = select(ApprovedFact).where(ApprovedFact.organization_id == organization_id)
     approved_facts = db.execute(stmt_facts).scalars().all()
+    if not approved_facts:
+        # Fallback to system baseline approved facts if organization has none
+        approved_facts = db.execute(select(ApprovedFact).limit(50)).scalars().all()
 
     # 2. Semantic retrieval of top guideline chunks
     query_vector = get_embedding(content)
@@ -269,6 +272,15 @@ def audit_content_with_rag(
         top_k=4,
         min_similarity=0.15,
     )
+    if not relevant_chunks:
+        # Fallback to system baseline chunks across all guidelines
+        relevant_chunks = KnowledgeService.search_relevant_chunks(
+            db=db,
+            organization_id="",
+            query_embedding=query_vector,
+            top_k=4,
+            min_similarity=0.10,
+        )
 
     # 3. Execute LLM or Grounded Fallback
     if settings.GEMINI_API_KEY:

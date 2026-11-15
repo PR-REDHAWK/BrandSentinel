@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PlusCircle, FileCheck2, Clock, Send, FileText, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
 import { Submission } from "@/lib/types";
 
 export default function SubmissionsPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,14 +41,18 @@ export default function SubmissionsPage() {
     if (!title || !rawContent) return;
     setSubmitting(true);
     try {
-      await api.createSubmission({
+      const created = await api.createSubmission({
         title,
         target_channel: targetChannel,
         raw_content: rawContent,
       });
-      setTitle("");
-      setRawContent("");
-      await loadSubmissions();
+      // Automatically execute the Tri-Engine audit immediately
+      try {
+        await api.runAudit(created.id, rawContent);
+      } catch (auditErr) {
+        console.warn("Audit execution warning:", auditErr);
+      }
+      router.push(`/submissions/${created.id}`);
     } catch (err: any) {
       alert(err.message || "Failed to create draft submission");
     } finally {
@@ -101,7 +107,7 @@ export default function SubmissionsPage() {
                   setTitle("Acme Enterprise Promotion");
                   setTargetChannel("Social");
                   setRawContent(
-                    "Switch to Acme now to cut infrastructure expenses to nothing overnight! Our miraculous technology saves up to 80% immediately with zero setup required."
+                    "Switch to Acme now to cut infrastructure costs to nothing overnight! Our miraculous technology saves up to 80% immediately with zero setup required."
                   );
                 }}
                 className="text-left px-2.5 py-1.5 bg-white hover:bg-blue-600 hover:text-white border border-blue-200 rounded-lg text-xs font-medium text-slate-700 transition flex items-center justify-between group"

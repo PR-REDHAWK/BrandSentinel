@@ -78,9 +78,14 @@ def run_unified_audit_pipeline(
     # 1. Fetch organization knowledge assets
     glossary_stmt = select(GlossaryTerm).where(GlossaryTerm.organization_id == organization_id)
     glossary_terms = db.execute(glossary_stmt).scalars().all()
+    if not glossary_terms:
+        # Fallback to system baseline terms if organization hasn't added custom glossary
+        glossary_terms = db.execute(select(GlossaryTerm).limit(50)).scalars().all()
 
     assets_stmt = select(BrandAsset).where(BrandAsset.organization_id == organization_id)
     brand_assets = db.execute(assets_stmt).scalars().all()
+    if not brand_assets:
+        brand_assets = db.execute(select(BrandAsset).limit(20)).scalars().all()
     palette_assets = [a for a in brand_assets if a.asset_type == "PALETTE"]
     logo_assets = [a for a in brand_assets if a.asset_type == "LOGO"]
 

@@ -513,13 +513,32 @@ export default function SubmissionAuditPage({ params }: { params: Promise<{ id: 
           </div>
 
           {findings.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-400">
-              <ShieldCheck className="w-10 h-10 text-emerald-600 mx-auto mb-2 opacity-80" />
-              <p className="text-sm font-medium text-slate-700">No brand violations detected.</p>
-              <p className="text-xs text-slate-500 mt-1">
-                Content complies fully with active brand guidelines and verified facts.
-              </p>
-            </div>
+            submission.current_status === "DRAFT" ? (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50/60 border border-blue-200 rounded-xl p-8 text-center space-y-3">
+                <Sparkles className="w-10 h-10 text-blue-600 mx-auto animate-pulse" />
+                <h3 className="text-base font-bold text-slate-900">New Draft Created — Ready for Tri-Engine Audit</h3>
+                <p className="text-xs text-slate-600 max-w-md mx-auto">
+                  Click below to execute parallel deterministic regex, RAG grounding, and vision analysis across your brand guidelines.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRunAudit}
+                  disabled={auditing}
+                  className="inline-flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-xs transition"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>{auditing ? "Executing Tri-Engine Audit..." : "Run Tri-Engine Audit Now"}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-400">
+                <ShieldCheck className="w-10 h-10 text-emerald-600 mx-auto mb-2 opacity-80" />
+                <p className="text-sm font-medium text-slate-700">No brand violations detected.</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Content complies fully with active brand guidelines and verified facts.
+                </p>
+              </div>
+            )
           ) : (
             <div className="space-y-4">
               {findings.map((f) => {

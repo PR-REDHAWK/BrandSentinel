@@ -147,11 +147,9 @@ class KnowledgeService:
         """
         Retrieve top-k relevant document chunks for an organization using cosine similarity.
         """
-        stmt = (
-            select(DocumentChunk)
-            .options(selectinload(DocumentChunk.guideline))
-            .where(DocumentChunk.organization_id == organization_id)
-        )
+        stmt = select(DocumentChunk).options(selectinload(DocumentChunk.guideline))
+        if organization_id:
+            stmt = stmt.where(DocumentChunk.organization_id == organization_id)
         chunks = db.execute(stmt).scalars().all()
 
         scored_chunks = []
