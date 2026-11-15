@@ -1,0 +1,22 @@
+name: Keep Render Backend Awake
+
+on:
+  schedule:
+    # Run every 10 minutes to prevent Render free-tier sleep (sleeps after 15 mins)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Health Check
+        run: |
+          echo "Pinging BrandSentinel backend..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 30 "https://brandsentinel-i28k.onrender.com/health")
+          echo "Response code: $STATUS"
+          if [ "$STATUS" -eq 200 ]; then
+            echo "Backend is warm and healthy."
+          else
+            echo "Backend ping returned status $STATUS"
+          fi

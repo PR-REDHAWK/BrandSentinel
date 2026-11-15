@@ -1,4 +1,6 @@
+import asyncio
 import os
+import urllib.request
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +9,25 @@ from app.config import settings
 from app.database import init_db
 from app.routers import admin, analytics, audit, auth, governance, knowledge
 from app.utils.logger import logger
+
+
+async def _self_ping_loop():
+    """Background task to keep Render free tier awake by pinging itself every 12 minutes."""
+    public_url = os.getenv("RENDER_EXTERNAL_URL") or "https://brandsentinel-i28k.onrender.com"
+    health_url = f"{public_url.rstrip('/')}/health"
+    await asyncio.sleep(60)
+    while True:
+        try:
+            def _ping():
+                req = urllib.request.Request(health_url, headers={"User-Agent": "BrandSentinel-KeepAlive"})
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    return resp.status
+            status = await asyncio.to_thread(_ping)
+            logger.info(f"Keep-alive self ping to {health_url}: HTTP {status}")
+        except Exception as e:
+            logger.debug(f"Keep-alive notice: {e}")
+        # Sleep for 12 minutes (Render idle timeout is 15 minutes)
+        await asyncio.sleep(720)
 
 
 @asynccontextmanager
@@ -26,8 +47,12 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"AUTO_SEED notice: {e}")
 
+    # Start keep-alive loop
+    ping_task = asyncio.create_task(_self_ping_loop())
+
     yield
     # Shutdown
+    ping_task.cancel()
     logger.info("BrandSentinel backend shutting down.")
 
 

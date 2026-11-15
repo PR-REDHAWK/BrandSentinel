@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { BackendWarmer } from "@/components/layout/BackendWarmer";
 
 export const metadata: Metadata = {
   title: "BrandSentinel — Intelligent Brand Governance Platform",
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen">
+        <BackendWarmer />
         <AuthProvider>
           <Navbar />
           <div className="flex">
