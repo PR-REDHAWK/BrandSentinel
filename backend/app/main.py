@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,17 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing database schemas...")
     init_db()
     logger.info("Database schemas initialized successfully.")
+
+    # Auto-seed initial demo dataset if requested
+    if settings.AUTO_SEED or os.getenv("AUTO_SEED", "false").lower() == "true":
+        logger.info("AUTO_SEED enabled: populating demo dataset...")
+        try:
+            from scripts.seed_demo import seed_demo_data
+            seed_demo_data()
+            logger.info("Demo data seeding completed successfully.")
+        except Exception as e:
+            logger.error(f"AUTO_SEED notice: {e}")
+
     yield
     # Shutdown
     logger.info("BrandSentinel backend shutting down.")
@@ -28,15 +40,24 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Configure CORS for Next.js frontend
+# Configure CORS for Next.js frontend and live production origins
+cors_origins_raw = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+default_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+for d in default_origins:
+    if d not in cors_origins_raw and "*" not in cors_origins_raw:
+        cors_origins_raw.append(d)
+
+allow_all = "*" in cors_origins_raw
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ],
+    allow_origins=["*"] if allow_all else cors_origins_raw,
+    allow_origin_regex=r"^https?://.*" if allow_all else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

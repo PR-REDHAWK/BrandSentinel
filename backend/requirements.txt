@@ -13,4 +13,5 @@ pytesseract>=0.3.13
 google-genai>=0.1.1
 numpy>=2.1.0
 asyncpg>=0.30.0
+psycopg2-binary>=2.9.9
 pytest>=8.3.0

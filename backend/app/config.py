@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "brandsentinel_secret_key_change_in_production_jwt_2026_super_secure"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
+    CORS_ORIGINS: str = "*"
+    AUTO_SEED: bool = False
 
     # Persistence
     DATABASE_URL: str = "sqlite:///./brandsentinel.db"
